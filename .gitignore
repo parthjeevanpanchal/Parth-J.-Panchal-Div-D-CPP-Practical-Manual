@@ -1,0 +1,17 @@
+# Compiled Object and Executable files
+*.exe
+*.out
+*.o
+*.obj
+
+# Debugging and symbol files
+*.pdb
+*.ilk
+*.idb
+
+# Editor and IDE configurations
+.vscode/
+.vs/
+.idea/
+*.suo
+*.user
