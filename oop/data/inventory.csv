@@ -1,0 +1,13 @@
+Type,ID,Name,Quantity,Price,Category,Extra1,Extra2
+Standard,101,"Heavy Duty Stapler",45,350.00,"Stationery",N/A,N/A
+Standard,102,"A4 Printing Paper (500 Sheets)",120,280.00,"Stationery",N/A,N/A
+Perishable,201,"Amul Taaza Milk 1L",35,56.00,"Dairy","2026-11-28",4.0
+Perishable,202,"Epigamia Greek Yogurt",18,85.00,"Dairy","2026-12-05",3.5
+Electronics,301,"Logitech B170 Wireless Mouse",30,649.00,"Peripherals",36,"Logitech"
+Electronics,302,"Dell 24-inch IPS Monitor",8,11499.00,"Monitors",36,"Dell"
+Standard,103,"Green Soul Ergonomic Chair",4,8999.00,"Furniture",N/A,N/A
+Perishable,203,"Mother Dairy Paneer 200g",12,95.00,"Dairy","2026-11-26",4.0
+Electronics,303,"Boat Rockerz 450 Headphones",5,1299.00,"Audio",12,"boAt"
+Standard,104,"Classmate Spiral Notebook 6-Pack",50,420.00,"Stationery",N/A,N/A
+Electronics,304,"Zebronics 4-Port USB 3.0 Hub",3,399.00,"Accessories",12,"Zebronics"
+Perishable,204,"Amul Butter 500g",22,275.00,"Dairy","2026-12-15",4.0

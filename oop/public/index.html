@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockMatrix India | Enterprise Inventory & Asset ERP (OOP & STL)</title>
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js for Visual Inventory Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-badge-icon">
+          <span>₹</span>
+        </div>
+        <div class="brand-info">
+          <h2>StockMatrix <span class="in-tag">IN</span></h2>
+          <span class="brand-sub">Practical 12 &bull; OOP Edition</span>
+        </div>
+      </div>
+
+      <div class="sidebar-search">
+        <i data-lucide="search"></i>
+        <input type="text" id="sidebarQuickSearch" placeholder="Quick find... (Press /)">
+        <span class="kbd-hint">/</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">MANAGEMENT</div>
+        <button class="nav-item active" data-tab="dashboard">
+          <i data-lucide="layout-grid"></i>
+          <span>Dashboard & Overview</span>
+        </button>
+        <button class="nav-item" data-tab="catalog">
+          <i data-lucide="package"></i>
+          <span>Inventory Catalog</span>
+          <span class="nav-pill" id="navItemCount">0</span>
+        </button>
+        <button class="nav-item" data-tab="low-stock">
+          <i data-lucide="alert-triangle"></i>
+          <span>Low Stock Reorders</span>
+          <span class="nav-pill pill-alert" id="navLowStockCount">0</span>
+        </button>
+        <button class="nav-item" data-tab="transactions">
+          <i data-lucide="receipt"></i>
+          <span>Transaction Audit</span>
+        </button>
+
+        <div class="nav-section-title">ANALYTICS & TECH</div>
+        <button class="nav-item" data-tab="analytics">
+          <i data-lucide="pie-chart"></i>
+          <span>Portfolio Analytics</span>
+        </button>
+        <button class="nav-item" data-tab="architecture">
+          <i data-lucide="cpu"></i>
+          <span>OOP & UML Design</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="backend-status-card">
+          <div class="status-indicator">
+            <span class="pulse-dot"></span>
+            <span id="backendStatusLabel">CSV Data Connected</span>
+          </div>
+          <span class="currency-tag">Currency: <strong>INR (₹)</strong></span>
+        </div>
+        <div class="theme-toggle-row">
+          <span>Theme Mode</span>
+          <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">
+            <i data-lucide="moon" id="themeIcon"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="main-wrapper">
+      <!-- TOP NAVIGATION BAR -->
+      <header class="navbar">
+        <div class="navbar-left">
+          <h1 id="navbarTitle">Inventory Overview</h1>
+          <span class="breadcrumb" id="navbarSubtitle">Real-time stock valuation & asset management in Indian Rupees (₹)</span>
+        </div>
+
+        <div class="navbar-right">
+          <div class="stats-chip">
+            <span class="chip-label">Portfolio Value</span>
+            <span class="chip-val" id="chipTotalValuation">₹0.00</span>
+          </div>
+
+          <button class="btn btn-secondary" id="btnExportCSV" title="Export catalog to CSV">
+            <i data-lucide="file-spreadsheet"></i>
+            <span>Export CSV</span>
+          </button>
+
+          <button class="btn btn-primary" id="btnOpenAddModal">
+            <i data-lucide="plus"></i>
+            <span>New Item</span>
+            <span class="kbd-badge">Alt+N</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- CONTENT BODY -->
+      <main class="content-body">
+        <!-- KPI METRICS ROW -->
+        <section class="kpi-grid">
+          <div class="kpi-card kpi-blue">
+            <div class="kpi-icon-wrap">
+              <i data-lucide="box"></i>
+            </div>
+            <div class="kpi-content">
+              <span class="kpi-title">Total Product Lines</span>
+              <h3 class="kpi-number" id="kpiTotalItems">0</h3>
+              <div class="kpi-meta"><span class="badge-tag">Across All Categories</span></div>
+            </div>
+          </div>
+
+          <div class="kpi-card kpi-emerald">
+            <div class="kpi-icon-wrap">
+              <i data-lucide="layers"></i>
+            </div>
+            <div class="kpi-content">
+              <span class="kpi-title">Stock Volume in Hand</span>
+              <h3 class="kpi-number" id="kpiTotalUnits">0</h3>
+              <div class="kpi-meta"><span class="badge-tag tag-green">Physical Units</span></div>
+            </div>
+          </div>
+
+          <div class="kpi-card kpi-violet">
+            <div class="kpi-icon-wrap">
+              <i data-lucide="indian-rupee"></i>
+            </div>
+            <div class="kpi-content">
+              <span class="kpi-title">Total Portfolio Valuation</span>
+              <h3 class="kpi-number" id="kpiTotalValuation">&#8377; 0.00</h3>
+              <div class="kpi-meta"><span class="badge-tag tag-violet">Indian Rupee (INR)</span></div>
+            </div>
+          </div>
+
+          <div class="kpi-card kpi-amber" id="kpiLowStockCard">
+            <div class="kpi-icon-wrap">
+              <i data-lucide="alert-circle"></i>
+            </div>
+            <div class="kpi-content">
+              <span class="kpi-title">Low Stock Alerts</span>
+              <h3 class="kpi-number" id="kpiLowStock">0</h3>
+              <div class="kpi-meta"><span class="badge-tag tag-amber">&le; 5 units threshold</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 1: DASHBOARD & CATALOG -->
+        <section class="tab-view active" id="viewCatalog">
+          <div class="card-panel">
+            <!-- QUICK FILTER CHIPS -->
+            <div class="filter-chips-bar" id="categoryChips">
+              <button class="chip-filter active" data-filter="ALL">All Items</button>
+              <button class="chip-filter" data-filter="Stationery">Stationery</button>
+              <button class="chip-filter" data-filter="Dairy">Dairy &amp; Fresh</button>
+              <button class="chip-filter" data-filter="Peripherals">Peripherals</button>
+              <button class="chip-filter" data-filter="Monitors">Monitors</button>
+              <button class="chip-filter" data-filter="LOW_STOCK">⚠️ Low Stock</button>
+            </div>
+
+            <!-- SEARCH & ACTIONS TOOLBAR -->
+            <div class="table-toolbar">
+              <div class="search-input-wrapper">
+                <i data-lucide="search"></i>
+                <input type="text" id="catalogSearchInput" placeholder="Search by name, ID, category, or brand... (Press /)">
+                <button class="clear-btn" id="btnClearSearch" style="display: none;">&times;</button>
+              </div>
+
+              <div class="toolbar-controls">
+                <div class="control-box">
+                  <label><i data-lucide="layers"></i> Type:</label>
+                  <select id="catalogTypeSelect" class="styled-select">
+                    <option value="ALL">All OOP Types</option>
+                    <option value="Standard">Standard Goods</option>
+                    <option value="Perishable">Perishable Goods</option>
+                    <option value="Electronics">Electronics</option>
+                  </select>
+                </div>
+
+                <div class="control-box">
+                  <label><i data-lucide="arrow-down-up"></i> Sort by:</label>
+                  <select id="catalogSortSelect" class="styled-select">
+                    <option value="id_asc">ID (Lowest first)</option>
+                    <option value="id_desc">ID (Highest first)</option>
+                    <option value="price_desc">Price: High to Low (₹)</option>
+                    <option value="price_asc">Price: Low to High (₹)</option>
+                    <option value="qty_desc">Stock: High to Low</option>
+                    <option value="qty_asc">Stock: Low to High</option>
+                    <option value="name_asc">Name: A to Z</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- INVENTORY DATA TABLE -->
+            <div class="table-container">
+              <table class="inventory-table">
+                <thead>
+                  <tr>
+                    <th style="width: 80px;">Item ID</th>
+                    <th>Product Description</th>
+                    <th>OOP Type</th>
+                    <th>Category</th>
+                    <th style="width: 170px;">Stock Health</th>
+                    <th>Unit Price (₹)</th>
+                    <th>Total Value (₹)</th>
+                    <th>Category Specs</th>
+                    <th class="text-right" style="width: 140px;">Operations</th>
+                  </tr>
+                </thead>
+                <tbody id="catalogTableBody">
+                  <!-- Dynamically rendered -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-pagination-footer">
+              <div class="footer-meta" id="tableSummaryText">Showing 0 of 0 products</div>
+              <div class="footer-shortcuts">
+                <span>Tip: Click <strong>+</strong> for Quick Stock-In, <strong>-</strong> for Dispatch.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 2: LOW STOCK REORDERS -->
+        <section class="tab-view" id="viewLowStock">
+          <div class="card-panel">
+            <div class="panel-header-banner">
+              <div class="banner-icon-circle"><i data-lucide="alert-octagon"></i></div>
+              <div>
+                <h2>Replenishment Required (Stock &le; 5 Units)</h2>
+                <p>Prevent out-of-stock situations by initiating POs for the flagged items below.</p>
+              </div>
+            </div>
+
+            <div class="reorder-cards-grid" id="lowStockCardsGrid">
+              <!-- Reorder cards rendered here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: TRANSACTION AUDIT TRAIL -->
+        <section class="tab-view" id="viewTransactions">
+          <div class="card-panel">
+            <div class="panel-header-row">
+              <div>
+                <h2>Chronological Transaction Audit Ledger</h2>
+                <p class="subtitle">Permanent record of all stock-ins, dispatches, price updates, and initialization.</p>
+              </div>
+              <div class="search-input-wrapper sm">
+                <i data-lucide="search"></i>
+                <input type="text" id="txFilterInput" placeholder="Filter transactions...">
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="inventory-table">
+                <thead>
+                  <tr>
+                    <th>Tx ID</th>
+                    <th>Date &amp; Time</th>
+                    <th>Item ID</th>
+                    <th>Product Name</th>
+                    <th>Operation Type</th>
+                    <th>Quantity Change</th>
+                    <th>Resulting Balance</th>
+                    <th>Notes &amp; PO Reference</th>
+                  </tr>
+                </thead>
+                <tbody id="txTableBody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 4: VISUAL ANALYTICS -->
+        <section class="tab-view" id="viewAnalytics">
+          <div class="charts-grid">
+            <div class="card-panel chart-panel">
+              <div class="chart-header">
+                <h3><i data-lucide="bar-chart-3"></i> Category Valuation Breakdown (₹ INR)</h3>
+                <span class="subtext">Asset worth distributed by category</span>
+              </div>
+              <div class="chart-body">
+                <canvas id="categoryValueChart"></canvas>
+              </div>
+            </div>
+
+            <div class="card-panel chart-panel">
+              <div class="chart-header">
+                <h3><i data-lucide="pie-chart"></i> Product Lines by Category</h3>
+                <span class="subtext">Count of items per department</span>
+              </div>
+              <div class="chart-body">
+                <canvas id="categoryCountChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 5: OOP ARCHITECTURE & UML -->
+        <section class="tab-view" id="viewArchitecture">
+          <div class="card-panel">
+            <div class="arch-intro">
+              <h2>Practical 12: Object-Oriented Architecture Specification</h2>
+              <p>Designed strictly to illustrate Encapsulation, Polymorphism, Inheritance, STL Containers, and Robust Exception Handling.</p>
+            </div>
+
+            <div class="oop-cards-row">
+              <div class="oop-card">
+                <div class="oop-icon"><i data-lucide="shield"></i></div>
+                <h4>1. Encapsulation</h4>
+                <p>Private member variables (<code>m_id</code>, <code>m_quantity</code>, <code>m_price</code>) protected by invariant setters. Direct balance corruption is impossible.</p>
+              </div>
+
+              <div class="oop-card">
+                <div class="oop-icon"><i data-lucide="git-branch"></i></div>
+                <h4>2. Inheritance & Polymorphism</h4>
+                <p>Base class <code>Item</code> is specialized into <code>PerishableItem</code> and <code>ElectronicsItem</code>. Virtual methods execute dynamically via <code>std::shared_ptr&lt;Item&gt;</code>.</p>
+              </div>
+
+              <div class="oop-card">
+                <div class="oop-icon"><i data-lucide="database"></i></div>
+                <h4>3. STL Containers</h4>
+                <p><code>std::map&lt;int, shared_ptr&lt;Item&gt;&gt;</code> maintains natural $O(\log N)$ sorted order; <code>std::vector&lt;Transaction&gt;</code> provides sequential audit logging.</p>
+              </div>
+
+              <div class="oop-card">
+                <div class="oop-icon"><i data-lucide="ban"></i></div>
+                <h4>4. Negative Stock Guard</h4>
+                <p>Guaranteed negative stock prevention. When <code>amount &gt; m_quantity</code>, <code>InsufficientStockException</code> aborts subtraction cleanly.</p>
+              </div>
+            </div>
+
+            <!-- INTERACTIVE UML BOX -->
+            <div class="uml-canvas-container">
+              <h3>UML Class Structure</h3>
+              <div class="uml-tree">
+                <div class="uml-box-node node-base">
+                  <div class="box-header">Item (Base Class)</div>
+                  <div class="box-content">
+                    <div># int m_id</div>
+                    <div># string m_name</div>
+                    <div># int m_quantity</div>
+                    <div># double m_price (in INR ₹)</div>
+                    <div># string m_category</div>
+                    <hr>
+                    <div>+ stockIn(int): void</div>
+                    <div>+ stockOut(int): void <em>[Throws InsufficientStock]</em></div>
+                    <div>+ virtual display(): void</div>
+                    <div>+ virtual serializeCSV(): string</div>
+                  </div>
+                </div>
+
+                <div class="uml-tree-arrow">&darr; Inherited By &darr;</div>
+
+                <div class="uml-children-row">
+                  <div class="uml-box-node node-derived">
+                    <div class="box-header">PerishableItem</div>
+                    <div class="box-content">
+                      <div>- string m_expiryDate</div>
+                      <div>- double m_storageTemp (&deg;C)</div>
+                      <hr>
+                      <div>+ display(): void (override)</div>
+                      <div>+ serializeCSV(): string (override)</div>
+                    </div>
+                  </div>
+
+                  <div class="uml-box-node node-derived">
+                    <div class="box-header">ElectronicsItem</div>
+                    <div class="box-content">
+                      <div>- int m_warrantyMonths</div>
+                      <div>- string m_brand</div>
+                      <hr>
+                      <div>+ display(): void (override)</div>
+                      <div>+ serializeCSV(): string (override)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD PRODUCT -->
+  <div class="modal-backdrop" id="modalAdd">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="icon-circle"><i data-lucide="plus"></i></div>
+          <div>
+            <h3>Add New Product Line</h3>
+            <p>Assign category, price in Indian Rupees (₹), and initial stock</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btnCloseAddModal">&times;</button>
+      </div>
+
+      <form id="formAddItem" class="modal-form">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="addType">OOP Type Classification *</label>
+            <select id="addType" class="input-control" required>
+              <option value="Standard">Standard Item (FMCG, Office, Furniture)</option>
+              <option value="Perishable">Perishable Item (Dairy, Groceries, Medicine)</option>
+              <option value="Electronics">Electronics (Peripherals, Audio, Hardware)</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="addId">Unique Item ID *</label>
+            <input type="number" id="addId" class="input-control" placeholder="e.g. 105" required min="1">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field" style="flex: 2;">
+            <label for="addName">Product Name *</label>
+            <input type="text" id="addName" class="input-control" placeholder="e.g. Amul Salted Butter 500g" required>
+          </div>
+          <div class="form-field">
+            <label for="addCategory">Category Tag *</label>
+            <input type="text" id="addCategory" class="input-control" placeholder="e.g. Dairy, Stationery" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label for="addQuantity">Initial Stock (Units) *</label>
+            <input type="number" id="addQuantity" class="input-control" placeholder="0" min="0" required>
+          </div>
+          <div class="form-field">
+            <label for="addPrice">Unit Price (₹ INR) *</label>
+            <div class="input-currency-wrapper">
+              <span class="currency-symbol">₹</span>
+              <input type="number" id="addPrice" class="input-control has-currency" placeholder="0.00" step="0.5" min="0" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIVE VALUATION DISPLAY -->
+        <div class="valuation-preview-box">
+          <span>Estimated Batch Valuation:</span>
+          <strong id="addValuationPreview">₹ 0.00</strong>
+        </div>
+
+        <!-- PERISHABLE EXTRA FIELDS -->
+        <div class="type-extra-fields" id="addPerishableFields" style="display: none;">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="addExpiry">Expiry Date (YYYY-MM-DD)</label>
+              <input type="date" id="addExpiry" class="input-control">
+            </div>
+            <div class="form-field">
+              <label for="addTemp">Storage Temperature (&deg;C)</label>
+              <input type="number" id="addTemp" class="input-control" placeholder="4.0" step="0.5">
+            </div>
+          </div>
+        </div>
+
+        <!-- ELECTRONICS EXTRA FIELDS -->
+        <div class="type-extra-fields" id="addElectronicsFields" style="display: none;">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="addWarranty">Warranty Period (Months)</label>
+              <input type="number" id="addWarranty" class="input-control" placeholder="12" min="0">
+            </div>
+            <div class="form-field">
+              <label for="addBrand">Manufacturer / Brand</label>
+              <input type="text" id="addBrand" class="input-control" placeholder="e.g. boAt, Zebronics, Amul">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelAdd">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i data-lucide="check"></i> Create Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: QUICK STOCK-IN -->
+  <div class="modal-backdrop" id="modalStockIn">
+    <div class="modal-dialog sm">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="icon-circle icon-green"><i data-lucide="arrow-down-left"></i></div>
+          <div>
+            <h3>Stock-In (Replenish Inventory)</h3>
+            <p id="stockInItemHeader">Add incoming batch units</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btnCloseStockIn">&times;</button>
+      </div>
+
+      <form id="formStockIn" class="modal-form">
+        <input type="hidden" id="stockInItemId">
+
+        <div class="stock-balance-summary">
+          <div class="balance-item">
+            <span>Current Stock</span>
+            <strong id="stockInCurrentCount">0</strong>
+          </div>
+          <div class="balance-arrow">&plus;</div>
+          <div class="balance-item">
+            <span>New Incoming</span>
+            <strong id="stockInIncomingPreview" style="color:var(--emerald-600);">0</strong>
+          </div>
+          <div class="balance-arrow">&equals;</div>
+          <div class="balance-item highlight">
+            <span>New Balance</span>
+            <strong id="stockInTotalPreview">0</strong>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="stockInQty">Quantity to Add (Units) *</label>
+          <input type="number" id="stockInQty" class="input-control" min="1" placeholder="Enter amount" required autofocus>
+        </div>
+
+        <div class="form-field">
+          <label for="stockInNotes">Supplier / PO Invoice Note</label>
+          <input type="text" id="stockInNotes" class="input-control" placeholder="e.g. PO #IND-9024 Batch replenishment">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelStockIn">Cancel</button>
+          <button type="submit" class="btn btn-emerald"><i data-lucide="arrow-down"></i> Confirm Stock-In</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: QUICK STOCK-OUT (WITH INSTANT NEGATIVE STOCK GUARD) -->
+  <div class="modal-backdrop" id="modalStockOut">
+    <div class="modal-dialog sm">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="icon-circle icon-red"><i data-lucide="arrow-up-right"></i></div>
+          <div>
+            <h3>Stock-Out (Dispatch Goods)</h3>
+            <p id="stockOutItemHeader">Log dispatch or customer order</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btnCloseStockOut">&times;</button>
+      </div>
+
+      <form id="formStockOut" class="modal-form">
+        <input type="hidden" id="stockOutItemId">
+
+        <div class="stock-balance-summary">
+          <div class="balance-item">
+            <span>Available Stock</span>
+            <strong id="stockOutAvailableCount">0</strong>
+          </div>
+          <div class="balance-arrow">&minus;</div>
+          <div class="balance-item">
+            <span>Dispatch Amount</span>
+            <strong id="stockOutDispatchPreview" style="color:var(--red-600);">0</strong>
+          </div>
+          <div class="balance-arrow">&equals;</div>
+          <div class="balance-item highlight">
+            <span>Resulting Balance</span>
+            <strong id="stockOutResultPreview">0</strong>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="stockOutQty">Quantity to Dispatch *</label>
+          <input type="number" id="stockOutQty" class="input-control" min="1" placeholder="Enter quantity" required autofocus>
+          <div class="validation-warning-message" id="stockOutErrorMsg" style="display: none;">
+            <i data-lucide="shield-alert"></i>
+            <span id="stockOutErrorText"></span>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="stockOutNotes">Customer / Dispatch Order Reference</label>
+          <input type="text" id="stockOutNotes" class="input-control" placeholder="e.g. Order #DL-4819 Retail dispatch">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelStockOut">Cancel</button>
+          <button type="submit" class="btn btn-danger" id="btnSubmitStockOut">
+            <i data-lucide="check"></i> Confirm Dispatch
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-hub" id="toastHub"></div>
+
+  <!-- APPLICATION LOGIC SCRIPT -->
+  <script src="app.js"></script>
+</body>
+</html>
